@@ -227,9 +227,15 @@ export function classifyCustomData(contents: string): Example2D[] {
   let records = csv_parse(contents.trim(), {
     columns: ['x', 'y', 'label'],
     skip_empty_lines: true,
+    cast: true,
   });
 
-  return records.map(record => { record.x, record.y, record.label })
+  let points: Example2D[] = [];
+  for (let record of records) {
+    points.push({ x: record.x, y: record.y, label: record.label });
+  }
+
+  return points;
 }
 
 /**
