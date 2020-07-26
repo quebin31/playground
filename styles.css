@@ -992,3 +992,16 @@ footer .links a:hover {
 #main-part .mdl-slider.is-upgraded:focus:not(:active)::-webkit-slider-thumb {
   box-shadow: 0 0 0 10px rgba(0,0,0, 0.12);
 }
+
+input[type="file"] {
+  display: none;
+}
+
+.custom-file-upload {
+  border: 1px solid #183D4E;
+  background-color: #183D4E;
+  color: rgb(228, 220, 220);
+  display: inline-block;
+  padding: 6px 12px;
+  cursor: pointer;
+}

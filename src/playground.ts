@@ -30,6 +30,8 @@ import { AppendingLineChart } from "./linechart";
 import * as d3 from 'd3';
 
 let mainWidth;
+let file_contents;
+let file_name;
 
 // More scrolling
 d3.select(".more button").on("click", function () {
@@ -1127,9 +1129,35 @@ function simulationStarted() {
   parametersChanged = false;
 }
 
+function readSingleFile(e) {
+  var file = e.target.files[0];
+  if (!file) {
+    return;
+  }
+  var reader = new FileReader();
+  reader.onload = function(e) {
+    var contents = e.target.result;
+    displayContents(contents);
+  };
+  reader.readAsText(file);
+}
+
+function displayContents(contents) {
+  console.log("Done:");
+  file_contents = contents;
+  var file_element = document.getElementById('file-input');
+  file_name = (file_element as HTMLInputElement).value;
+  console.log(file_name);
+  reset();
+}
+
+
 drawDatasetThumbnails();
 initTutorial();
 makeGUI();
 generateData(true);
 reset(true);
 hideControls();
+
+document.getElementById('file-input')
+  .addEventListener('change', readSingleFile, false);
