@@ -1130,14 +1130,14 @@ function simulationStarted() {
 }
 
 function readSingleFile(e) {
-  var file = e.target.files[0];
+  let file = e.target.files[0];
   if (!file) {
     return;
   }
-  var reader = new FileReader();
+  let reader = new FileReader();
   reader.onload = function(e) {
-    var contents = e.target.result;
-    state.file_contents = contents;
+    let contents = e.target.result;
+    state.fileContents = contents;
     displayContents(contents);
   };
   reader.readAsText(file);
@@ -1146,9 +1146,9 @@ function readSingleFile(e) {
 function displayContents(contents) {
   console.log("Done:");
   file_contents = contents;
-  var file_element = document.getElementById('file-input');
+  let file_element = document.getElementById('file-input');
   file_name = (file_element as HTMLInputElement).value;
-  console.log(file_name," - ", state.file_contents);
+  console.log(file_name, " - ", typeof contents);
   reset();
 }
 
