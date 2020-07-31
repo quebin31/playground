@@ -61,7 +61,7 @@ export function isDataGenerator(x: any): x is DataGenerator {
 }
 
 export type DataLoader = {
-  call: (contents: string) => Example2D[],
+  call: (contents?: string) => Example2D[],
   variant: 'data_loader'
 }
 
@@ -223,14 +223,17 @@ export function classifyXORData(numSamples: number, noise: number):
   return points;
 }
 
-export function classifyCustomData(contents: string): Example2D[] {
+export function classifyCustomData(contents?: string): Example2D[] {
+  let points: Example2D[] = [];
+
+  if (!contents) return points;
+
   let records = csv_parse(contents.trim(), {
     columns: ['x', 'y', 'label'],
     skip_empty_lines: true,
     cast: true,
   });
 
-  let points: Example2D[] = [];
   for (let record of records) {
     points.push({ x: record.x, y: record.y, label: record.label });
   }
