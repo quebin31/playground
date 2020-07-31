@@ -1137,6 +1137,7 @@ function readSingleFile(e) {
   var reader = new FileReader();
   reader.onload = function(e) {
     var contents = e.target.result;
+    state.file_contents = contents;
     displayContents(contents);
   };
   reader.readAsText(file);
@@ -1147,7 +1148,7 @@ function displayContents(contents) {
   file_contents = contents;
   var file_element = document.getElementById('file-input');
   file_name = (file_element as HTMLInputElement).value;
-  console.log(file_name);
+  console.log(file_name," - ", state.file_contents);
   reset();
 }
 

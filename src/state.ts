@@ -161,6 +161,7 @@ export class State {
   sinX = false;
   cosY = false;
   sinY = false;
+  file_contents = null;
 
   dataset: dataset.DataGenerator | dataset.DataLoader = {
     call: dataset.classifyCircleData,
