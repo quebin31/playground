@@ -30,8 +30,6 @@ import { AppendingLineChart } from "./linechart";
 import * as d3 from 'd3';
 
 let mainWidth;
-let file_contents;
-let file_name;
 
 // More scrolling
 d3.select(".more button").on("click", function () {
@@ -40,6 +38,25 @@ d3.select(".more button").on("click", function () {
     .duration(1000)
     .tween("scroll", scrollTween(position));
 });
+
+document
+  .getElementById("file-input")
+  .addEventListener("change", function (e: any) {
+    let file = e.target.files[0];
+    if (!file) return;
+
+    let reader = new FileReader();
+    reader.onload = function (e) {
+      let contents = e.target.result;
+      state.customFileContents = contents;
+      drawDatasetThumbnails();
+      generateData();
+      reset();
+    };
+
+    reader.readAsText(file);
+
+  }, false);
 
 function scrollTween(offset) {
   return function () {
@@ -1003,7 +1020,7 @@ function drawDatasetThumbnails() {
     if (isDataGenerator(dataGenerator)) {
       data = dataGenerator.call(200, 0);
     } else {
-      data = dataGenerator.call("1.0,2.0,1.0");
+      data = dataGenerator.call(state.customFileContents);
     }
 
     data.forEach(function (d) {
@@ -1090,7 +1107,7 @@ function generateData(firstTime = false) {
   if (isDataGenerator(generator)) {
     data = generator.call(numSamples, state.noise / 100);
   } else {
-    data = generator.call("1.0,2.0,1.0");
+    data = generator.call(state.customFileContents);
   }
 
   // Shuffle the data in-place.
@@ -1129,36 +1146,9 @@ function simulationStarted() {
   parametersChanged = false;
 }
 
-function readSingleFile(e) {
-  let file = e.target.files[0];
-  if (!file) {
-    return;
-  }
-  let reader = new FileReader();
-  reader.onload = function(e) {
-    let contents = e.target.result;
-    state.fileContents = contents;
-    displayContents(contents);
-  };
-  reader.readAsText(file);
-}
-
-function displayContents(contents) {
-  console.log("Done:");
-  file_contents = contents;
-  let file_element = document.getElementById('file-input');
-  file_name = (file_element as HTMLInputElement).value;
-  console.log(file_name, " - ", typeof contents);
-  reset();
-}
-
-
 drawDatasetThumbnails();
 initTutorial();
 makeGUI();
 generateData(true);
 reset(true);
 hideControls();
-
-document.getElementById('file-input')
-  .addEventListener('change', readSingleFile, false);
