@@ -15,6 +15,7 @@ limitations under the License.
 
 import * as d3 from 'd3';
 import * as csv_parse from 'csv-parse/lib/sync';
+import { PCA } from 'ml-pca';
 
 /**
  * A two dimensional example: x and y coordinates with the label.
@@ -228,7 +229,7 @@ export function classifyCustomData(contents?: string): Example2D[] {
 
   if (!contents) return points;
 
-  let records = csv_parse(contents.trim(), {
+  /*let records = csv_parse(contents.trim(), {
     columns: ['x', 'y', 'label'],
     skip_empty_lines: true,
     cast: true,
@@ -236,6 +237,21 @@ export function classifyCustomData(contents?: string): Example2D[] {
 
   for (let record of records) {
     points.push({ x: record.x, y: record.y, label: record.label });
+  }*/
+
+  let records: Array<Array<number>> = csv_parse(contents.trim(), {
+    skip_empty_lines: true,
+    cast: true
+  });
+
+  let features = records.map((row) => row.slice(0, -1));
+
+  const analysis = new PCA(features);
+  let reduced_features = analysis.predict(features, { nComponents: 2 });
+
+  for (let i = 0, row = reduced_features.getRow(i); i < reduced_features.rows; i++) {
+    let point = { x: row[0], y: row[1], label: records[i][2] };
+    points.push(point);
   }
 
   return points;
