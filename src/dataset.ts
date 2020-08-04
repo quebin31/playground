@@ -15,6 +15,7 @@ limitations under the License.
 
 import * as d3 from 'd3';
 import * as csv_parse from 'csv-parse/lib/sync';
+import { PCA } from 'ml-pca';
 
 /**
  * A two dimensional example: x and y coordinates with the label.
@@ -228,17 +229,42 @@ export function classifyCustomData(contents?: string): Example2D[] {
 
   if (!contents) return points;
 
-  let records = csv_parse(contents.trim(), {
-    columns: ['x', 'y', 'label'],
+  let records: number[][] = csv_parse(contents.trim(), {
     skip_empty_lines: true,
-    cast: true,
+    cast: true
   });
 
-  for (let record of records) {
-    points.push({ x: record.x, y: record.y, label: record.label });
+  if (records.length == 0) return points;
+
+  let features: number[][];
+  if (records[0].length > 3) {
+    features = reduceDimensionality(records);
+  } else {
+    features = records.map((row) => row.slice(0, -1));
   }
 
+  points = features.map(function (row, index) {
+    return { x: row[0], y: row[1], label: records[index][2] };
+  });
+
   return points;
+}
+
+function reduceDimensionality(dataset: number[][], numberOfComponents: number = 2) {
+  let features = dataset.map((row) => row.slice(0, -1));
+  const analysis = new PCA(features);
+  let reducedMatrix = analysis.predict(features, { nComponents: numberOfComponents });
+
+  let reducedFeatures = matrixInto2DArray(reducedMatrix);
+  return reducedFeatures;
+}
+
+function matrixInto2DArray(matrix) {
+  let array2D: number[][] = [];
+  for (let i = 0; i < matrix.rows; i++) {
+    array2D.push(matrix.getRow(i));
+  }
+  return array2D;
 }
 
 /**
