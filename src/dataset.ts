@@ -229,32 +229,42 @@ export function classifyCustomData(contents?: string): Example2D[] {
 
   if (!contents) return points;
 
-  /*let records = csv_parse(contents.trim(), {
-    columns: ['x', 'y', 'label'],
-    skip_empty_lines: true,
-    cast: true,
-  });
-
-  for (let record of records) {
-    points.push({ x: record.x, y: record.y, label: record.label });
-  }*/
-
-  let records: Array<Array<number>> = csv_parse(contents.trim(), {
+  let records: number[][] = csv_parse(contents.trim(), {
     skip_empty_lines: true,
     cast: true
   });
 
-  let features = records.map((row) => row.slice(0, -1));
+  if (records.length == 0) return points;
 
-  const analysis = new PCA(features);
-  let reduced_features = analysis.predict(features, { nComponents: 2 });
-
-  for (let i = 0, row = reduced_features.getRow(i); i < reduced_features.rows; i++) {
-    let point = { x: row[0], y: row[1], label: records[i][2] };
-    points.push(point);
+  let features: number[][];
+  if (records[0].length > 3) {
+    features = reduceDimensionality(records);
+  } else {
+    features = records.map((row) => row.slice(0, -1));
   }
 
+  points = features.map(function (row, index) {
+    return { x: row[0], y: row[1], label: records[index][2] };
+  });
+
   return points;
+}
+
+function reduceDimensionality(dataset: number[][], numberOfComponents: number = 2) {
+  let features = dataset.map((row) => row.slice(0, -1));
+  const analysis = new PCA(features);
+  let reducedMatrix = analysis.predict(features, { nComponents: numberOfComponents });
+
+  let reducedFeatures = matrixInto2DArray(reducedMatrix);
+  return reducedFeatures;
+}
+
+function matrixInto2DArray(matrix) {
+  let array2D: number[][] = [];
+  for (let i = 0; i < matrix.rows; i++) {
+    array2D.push(matrix.getRow(i));
+  }
+  return array2D;
 }
 
 /**
