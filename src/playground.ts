@@ -1110,6 +1110,13 @@ function generateData(firstTime = false) {
     data = generator.call(state.customFileContents);
   }
 
+  let xDomain: [number, number] = getXDomain(data);
+  let yDomain: [number, number] = getYDomain(data);
+  d3.select("#heatmap").selectAll("*").remove();
+  heatMap =
+    new HeatMap(300, DENSITY, xDomain, yDomain, d3.select("#heatmap"),
+      { showAxes: true });
+
   // Shuffle the data in-place.
   shuffle(data);
   // Split into train and test data.
@@ -1118,6 +1125,18 @@ function generateData(firstTime = false) {
   testData = data.slice(splitIndex);
   heatMap.updatePoints(trainData);
   heatMap.updateTestPoints(state.showTestData ? testData : []);
+}
+
+function getXDomain(data: Example2D[]): [number, number] {
+  let max = Math.max.apply(Math, data.map(function (o) { return o.x; }))
+  let min = Math.min.apply(Math, data.map(function (o) { return o.x; }))
+  return [Math.floor(min), Math.ceil(max)];
+}
+
+function getYDomain(data: Example2D[]): [number, number] {
+  let max = Math.max.apply(Math, data.map(function (o) { return o.y; }))
+  let min = Math.min.apply(Math, data.map(function (o) { return o.y; }))
+  return [Math.floor(min), Math.ceil(max)];
 }
 
 let firstInteraction = true;
