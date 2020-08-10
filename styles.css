@@ -695,6 +695,34 @@ g.column rect {
   opacity: 1.0;
 }
 
+#network .node.selected {
+  background-color: red;
+}
+
+#network .canvas.selected canvas {
+  opacity: 1.0;
+  border: 2px solid green;
+  top: -2px;
+  left: -2px;
+  fill:red;
+}
+
+#network .node.unselected {
+  opacity: 0.2;
+}
+
+#network .canvas.unselected canvas {
+  opacity: 0.2;
+  border: 2px solid gray;
+  top: -2px;
+  left: -2px;
+}
+
+#network .node.selected {
+  opacity: 1.0;
+}
+
+
 @-webkit-keyframes flowing {
   from { stroke-dashoffset: 0; } to { stroke-dashoffset: -10; }
 }

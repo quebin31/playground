@@ -31,6 +31,8 @@ import * as d3 from 'd3';
 
 let mainWidth;
 
+let selectedNodes = [];
+
 // More scrolling
 d3.select(".more button").on("click", function () {
   let position = 800;
@@ -460,6 +462,8 @@ function drawNode(cx: number, cy: number, nodeId: string, isInput: boolean,
       height: RECT_SIZE,
     });
   let activeOrNotClass = state[nodeId] ? "active" : "inactive";
+
+
   if (isInput) {
     let label = INPUTS[nodeId].label != null ?
       INPUTS[nodeId].label : nodeId;
@@ -535,6 +539,41 @@ function drawNode(cx: number, cy: number, nodeId: string, isInput: boolean,
       updateDecisionBoundary(network, false);
       heatMap.updateBackground(boundary[nn.getOutputNode(network).id],
         state.discretize);
+    }).on("click", function () {
+      selectedNodes.push(nodeId);
+      if (div.classed("selected")) {
+        div.classed("selected", false);
+        nodeGroup.classed("selected", false);
+        div.classed("unselected", true);
+        nodeGroup.classed("unselected", true);
+      } else {
+        div.classed("selected", true);
+        nodeGroup.classed("selected", true);
+        div.classed("unselected", false);
+        nodeGroup.classed("unselected", false);
+      }
+
+      //heatMap.updateBackground(boundary[nodeId], state.discretize);
+      /*if(alguna_seleccionada){
+        if(yo_estaba_selected){
+          unselected//pink
+        }else{
+          selected//green
+        }
+      }else{
+        //go back to initial
+        //black
+      }*/
+
+      console.log('Brus puto :3', d3.select(`#node${nodeId}`));
+
+      /*nodeGroup.attr({
+        //"class": "node lol",
+        "style": "display:hidden",
+        "id": `node${nodeId}`,
+        "transform": `translate(${x},${y})`
+      });*/
+      //reset();
     });
   if (isInput) {
     div.on("click", function () {
