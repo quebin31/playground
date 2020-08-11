@@ -589,17 +589,17 @@ function changePathsVisibility() {
       let source = d3.select(`#node${i}`);
       if (j == neuronNumber) {
         if (source.classed("unselected")) {
-          console.log(`Apagar ${i}-${j}`);
+          possiblePath.classed("link-unselected", true);
         } else {
-          console.log(`Encender ${i}-${j}`);
+          possiblePath.classed("link-unselected", false);
         }
         continue;
       }
       let dest = d3.select(`#node${j}`);
       if (source.classed("unselected") && dest.classed("unselected")) {
-        console.log(`Apagar ${i}-${j}`);
+        possiblePath.classed("link-unselected", true);
       } else {
-        console.log(`Encender ${i}-${j}`);
+        possiblePath.classed("link-unselected", false);
       }
     }
   }

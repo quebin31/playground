@@ -730,6 +730,16 @@ g.column rect {
 #network .core .link {
   stroke-dasharray: 9 1;
   stroke-dashoffset: 1;
+  opacity: 1;
+  /*-webkit-animation: 0.5s linear 0s infinite flowing;*/
+}
+
+#network .core .link-unselected {
+  stroke-dasharray: 9 1;
+  stroke-dashoffset: 1;
+  opacity: 0.4;
+  color: gray;
+  stroke: gray;
   /*-webkit-animation: 0.5s linear 0s infinite flowing;*/
 }
 
