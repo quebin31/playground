@@ -540,7 +540,6 @@ function drawNode(cx: number, cy: number, nodeId: string, isInput: boolean,
       heatMap.updateBackground(boundary[nn.getOutputNode(network).id],
         state.discretize);
     }).on("click", function () {
-      selectedNodes.push(nodeId);
       if (div.classed("selected")) {
         div.classed("selected", false);
         nodeGroup.classed("selected", false);
@@ -553,27 +552,10 @@ function drawNode(cx: number, cy: number, nodeId: string, isInput: boolean,
         nodeGroup.classed("unselected", false);
       }
 
-      //heatMap.updateBackground(boundary[nodeId], state.discretize);
-      /*if(alguna_seleccionada){
-        if(yo_estaba_selected){
-          unselected//pink
-        }else{
-          selected//green
-        }
-      }else{
-        //go back to initial
-        //black
-      }*/
+      changeNeuronsVisibility();
+      changePathsVisibility();
 
       console.log('Brus puto :3', d3.select(`#node${nodeId}`));
-
-      /*nodeGroup.attr({
-        //"class": "node lol",
-        "style": "display:hidden",
-        "id": `node${nodeId}`,
-        "transform": `translate(${x},${y})`
-      });*/
-      //reset();
     });
   if (isInput) {
     div.on("click", function () {
@@ -590,6 +572,54 @@ function drawNode(cx: number, cy: number, nodeId: string, isInput: boolean,
     xDomain, div, { noSvg: true });
   div.datum({ heatmap: nodeHeatMap, id: nodeId });
 
+}
+
+function changePathsVisibility() {
+  let neuronNumber = 0;
+  for (let i = 1; i < network.length; i++) {
+    neuronNumber += network[i].length;
+  }
+
+  //TODO(write): Replace console.log with real on/off path functions
+
+  for (let i = 1; i <= neuronNumber; i++) {
+    for (let j = i + 1; j <= neuronNumber; j++) {
+      let possiblePath = d3.select(`#link${i}-${j}`);
+      if (possiblePath[0][0] == null) continue;
+      let source = d3.select(`#node${i}`);
+      if (j == neuronNumber) {
+        if (source.classed("unselected")) {
+          console.log(`Apagar ${i}-${j}`);
+        } else {
+          console.log(`Encender ${i}-${j}`);
+        }
+        continue;
+      }
+      let dest = d3.select(`#node${j}`);
+      if (source.classed("unselected") && dest.classed("unselected")) {
+        console.log(`Apagar ${i}-${j}`);
+      } else {
+        console.log(`Encender ${i}-${j}`);
+      }
+    }
+  }
+}
+
+function changeNeuronsVisibility() {
+  let neuronNumber = 0;
+  for (let i = 1; i < network.length - 1; i++) {
+    neuronNumber += network[i].length;
+  }
+
+  for (let i = 1; i <= neuronNumber; i++) {
+    let div = d3.select(`#canvas-${i}`);
+    let nodeGroup = d3.select(`#node${i}`);
+
+    if (!div.classed("selected") && !div.classed("unselected")) {
+      div.classed("unselected", true);
+      nodeGroup.classed("unselected", true);
+    }
+  }
 }
 
 // Draw network
@@ -1203,6 +1233,7 @@ function simulationStarted() {
   });
   parametersChanged = false;
 }
+
 
 drawDatasetThumbnails();
 initTutorial();
