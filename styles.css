@@ -1056,3 +1056,7 @@ input[type="file"] {
   margin: 8px !important;
   margin-left: 0px !important;
 }
+
+.span-space {
+  width: 48px;
+}
