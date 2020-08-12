@@ -31,7 +31,6 @@ import * as d3 from 'd3';
 
 let mainWidth;
 
-let selectedNodes = [];
 
 // More scrolling
 d3.select(".more button").on("click", function () {
@@ -1107,6 +1106,8 @@ function reset(onStartup = false) {
   lossTest = getLoss(network, testData);
   drawNetwork(network);
   updateUI(true);
+  changePathsVisibility(true);
+  changeNeuronsVisibility(true);
 };
 
 function initTutorial() {
