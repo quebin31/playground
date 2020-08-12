@@ -695,6 +695,34 @@ g.column rect {
   opacity: 1.0;
 }
 
+#network .node.selected {
+  background-color: red;
+}
+
+#network .canvas.selected canvas {
+  opacity: 1.0;
+  /*border: 2px solid #009B72;*/
+  top: -2px;
+  left: -2px;
+  fill:red;
+}
+
+#network .node.unselected {
+  opacity: 0.2;
+}
+
+#network .canvas.unselected canvas {
+  opacity: 0.2;
+  border: 2px solid gray;
+  top: -2px;
+  left: -2px;
+}
+
+#network .node.selected {
+  opacity: 1.0;
+}
+
+
 @-webkit-keyframes flowing {
   from { stroke-dashoffset: 0; } to { stroke-dashoffset: -10; }
 }
@@ -702,6 +730,16 @@ g.column rect {
 #network .core .link {
   stroke-dasharray: 9 1;
   stroke-dashoffset: 1;
+  opacity: 1;
+  /*-webkit-animation: 0.5s linear 0s infinite flowing;*/
+}
+
+#network .core .link-unselected {
+  stroke-dasharray: 9 1;
+  stroke-dashoffset: 1;
+  opacity: 0.1;
+  color: gray;
+  stroke: gray;
   /*-webkit-animation: 0.5s linear 0s infinite flowing;*/
 }
 
@@ -999,6 +1037,7 @@ input[type="file"] {
 
 .custom-file-upload {
   border: 1px solid #183D4E;
+  border-radius: 4px;
   background-color: #183D4E;
   color: rgb(228, 220, 220);
   display: inline-block;

@@ -226,27 +226,29 @@ export function classifyXORData(numSamples: number, noise: number):
 
 export function classifyCustomData(contents?: string): Example2D[] {
   let points: Example2D[] = [];
-
+  
   if (!contents) return points;
-
+  
   let records: number[][] = csv_parse(contents.trim(), {
     skip_empty_lines: true,
     cast: true
   });
-
+  
   if (records.length == 0) return points;
-
+  
   let features: number[][];
   if (records[0].length > 3) {
     features = reduceDimensionality(records);
   } else {
     features = records.map((row) => row.slice(0, -1));
   }
-
+  
+  let row_length = records[0].length;
+  console.log("row length:", row_length);
   points = features.map(function (row, index) {
-    return { x: row[0], y: row[1], label: records[index][2] };
+    return { x: row[0], y: row[1], label: records[index][row_length - 1] };
   });
-
+  
   return points;
 }
 

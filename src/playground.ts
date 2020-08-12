@@ -31,6 +31,7 @@ import * as d3 from 'd3';
 
 let mainWidth;
 
+
 // More scrolling
 d3.select(".more button").on("click", function () {
   let position = 800;
@@ -460,6 +461,8 @@ function drawNode(cx: number, cy: number, nodeId: string, isInput: boolean,
       height: RECT_SIZE,
     });
   let activeOrNotClass = state[nodeId] ? "active" : "inactive";
+
+
   if (isInput) {
     let label = INPUTS[nodeId].label != null ?
       INPUTS[nodeId].label : nodeId;
@@ -504,7 +507,7 @@ function drawNode(cx: number, cy: number, nodeId: string, isInput: boolean,
         width: BIAS_SIZE,
         height: BIAS_SIZE,
       }).on("mouseenter", function () {
-        updateHoverCard(HoverType.BIAS, node, d3.mouse(container.node()));
+        updateHoverCard(HoverType.BIAS, node, d3.mouse(container.node()), nodeId);
       }).on("mouseleave", function () {
         updateHoverCard(null);
       });
@@ -535,6 +538,22 @@ function drawNode(cx: number, cy: number, nodeId: string, isInput: boolean,
       updateDecisionBoundary(network, false);
       heatMap.updateBackground(boundary[nn.getOutputNode(network).id],
         state.discretize);
+    }).on("click", function () {
+      if (div.classed("selected")) {
+        div.classed("selected", false);
+        nodeGroup.classed("selected", false);
+        div.classed("unselected", true);
+        nodeGroup.classed("unselected", true);
+      } else {
+        div.classed("selected", true);
+        nodeGroup.classed("selected", true);
+        div.classed("unselected", false);
+        nodeGroup.classed("unselected", false);
+      }
+
+      let reset = areAllNeuronsUnselected();
+      changeNeuronsVisibility(reset);
+      changePathsVisibility(reset);
     });
   if (isInput) {
     div.on("click", function () {
@@ -551,6 +570,90 @@ function drawNode(cx: number, cy: number, nodeId: string, isInput: boolean,
     xDomain, div, { noSvg: true });
   div.datum({ heatmap: nodeHeatMap, id: nodeId });
 
+}
+
+function areAllNeuronsUnselected(): boolean {
+  let neuronNumber = 0;
+  for (let i = 1; i < network.length; i++) {
+    neuronNumber += network[i].length;
+  }
+
+  for (let i = 1; i < neuronNumber; i++) {
+    let div = d3.select(`#canvas-${i}`);
+    let node = d3.select(`#node${i}`);
+    if (div.classed("selected") && node.classed("selected")) {
+      return false;
+    }
+  }
+
+  return true;
+}
+
+function changePathsVisibility(reset: boolean = false) {
+  let neuronNumber = 0;
+  for (let i = 1; i < network.length; i++) {
+    neuronNumber += network[i].length;
+  }
+
+  for (let inputId in INPUTS) {
+    for (let i = 1; i <= neuronNumber; i++) {
+      let possiblePath = d3.select(`#link${inputId}-${i}`);
+      if (!possiblePath[0][0]) break;
+
+      let dest = d3.select(`#node${i}`);
+      if (!reset && dest.classed("unselected")) {
+        possiblePath.classed("link-unselected", true);
+      } else {
+        possiblePath.classed("link-unselected", false);
+      }
+    }
+  }
+
+  for (let i = 1; i <= neuronNumber; i++) {
+    for (let j = i + 1; j <= neuronNumber; j++) {
+      let possiblePath = d3.select(`#link${i}-${j}`);
+      if (!possiblePath[0][0]) continue;
+
+      let source = d3.select(`#node${i}`);
+      if (j == neuronNumber) {
+        if (!reset && source.classed("unselected")) {
+          possiblePath.classed("link-unselected", true);
+        } else {
+          possiblePath.classed("link-unselected", false);
+        }
+        continue;
+      }
+
+      let dest = d3.select(`#node${j}`);
+      if (!reset && source.classed("unselected") && dest.classed("unselected")) {
+        possiblePath.classed("link-unselected", true);
+      } else {
+        possiblePath.classed("link-unselected", false);
+      }
+    }
+  }
+}
+
+function changeNeuronsVisibility(reset: boolean = false) {
+  let neuronNumber = 0;
+  for (let i = 1; i < network.length - 1; i++) {
+    neuronNumber += network[i].length;
+  }
+
+  for (let i = 1; i <= neuronNumber; i++) {
+    let div = d3.select(`#canvas-${i}`);
+    let nodeGroup = d3.select(`#node${i}`);
+
+    if (reset) {
+      div.classed("unselected", false);
+      nodeGroup.classed("unselected", false);
+      div.classed("selected", false);
+      nodeGroup.classed("unselected", false);
+    } else if (!div.classed("selected") && !div.classed("unselected")) {
+      div.classed("unselected", true);
+      nodeGroup.classed("unselected", true);
+    }
+  }
 }
 
 // Draw network
@@ -722,13 +825,34 @@ function addPlusMinusControl(x: number, layerIdx: number) {
 }
 
 function updateHoverCard(type: HoverType, nodeOrLink?: nn.Node | nn.Link,
-  coordinates?: [number, number]) {
+  coordinates?: [number, number], ids?: [string, string] | string) {
   let hovercard = d3.select("#hovercard");
+
   if (type == null) {
     hovercard.style("display", "none");
     d3.select("#svg").on("click", null);
     return;
   }
+
+  if (type === HoverType.WEIGHT) {
+    let [origId, destId] = ids as [string, string];
+    let path = d3.select(`#link${origId}-${destId}`);
+    if (path[0][0] && path.classed("link-unselected")) {
+      hovercard.style("display", "none");
+      d3.select("#svg").on("click", null);
+      return;
+    }
+  } else {
+    let id = ids as string;
+    let node = d3.select(`#canvas-${id}`);
+
+    if (node.classed("unselected")) {
+      hovercard.style("display", "none");
+      d3.select("#svg").on("click", null);
+      return;
+    }
+  }
+
   d3.select("#svg").on("click", () => {
     hovercard.select(".value").style("display", "none");
     let input = hovercard.select("input");
@@ -799,10 +923,12 @@ function drawLink(
     .attr("d", diagonal(datum, 0))
     .attr("class", "link-hover")
     .on("mouseenter", function () {
-      updateHoverCard(HoverType.WEIGHT, input, d3.mouse(this));
-    }).on("mouseleave", function () {
+      updateHoverCard(HoverType.WEIGHT, input, d3.mouse(this), [input.source.id, input.dest.id]);
+    })
+    .on("mouseleave", function () {
       updateHoverCard(null);
     });
+
   return line;
 }
 
@@ -980,6 +1106,8 @@ function reset(onStartup = false) {
   lossTest = getLoss(network, testData);
   drawNetwork(network);
   updateUI(true);
+  changePathsVisibility(true);
+  changeNeuronsVisibility(true);
 };
 
 function initTutorial() {
@@ -1164,6 +1292,7 @@ function simulationStarted() {
   });
   parametersChanged = false;
 }
+
 
 drawDatasetThumbnails();
 initTutorial();
