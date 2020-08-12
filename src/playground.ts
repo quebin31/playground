@@ -552,10 +552,9 @@ function drawNode(cx: number, cy: number, nodeId: string, isInput: boolean,
         nodeGroup.classed("unselected", false);
       }
 
-      changeNeuronsVisibility();
-      changePathsVisibility();
-
-      console.log('Brus puto :3', d3.select(`#node${nodeId}`));
+      let reset = areAllNeuronsUnselected();
+      changeNeuronsVisibility(reset);
+      changePathsVisibility(reset);
     });
   if (isInput) {
     div.on("click", function () {
@@ -574,29 +573,60 @@ function drawNode(cx: number, cy: number, nodeId: string, isInput: boolean,
 
 }
 
-function changePathsVisibility() {
+function areAllNeuronsUnselected(): boolean {
   let neuronNumber = 0;
   for (let i = 1; i < network.length; i++) {
     neuronNumber += network[i].length;
   }
 
-  //TODO(write): Replace console.log with real on/off path functions
+  for (let i = 1; i < neuronNumber; i++) {
+    let div = d3.select(`#canvas-${i}`);
+    let node = d3.select(`#node${i}`);
+    if (div.classed("selected") && node.classed("selected")) {
+      return false;
+    }
+  }
+
+  return true;
+}
+
+function changePathsVisibility(reset: boolean = false) {
+  let neuronNumber = 0;
+  for (let i = 1; i < network.length; i++) {
+    neuronNumber += network[i].length;
+  }
+
+  for (let inputId in INPUTS) {
+    for (let i = 1; i <= neuronNumber; i++) {
+      let possiblePath = d3.select(`#link${inputId}-${i}`);
+      if (!possiblePath[0][0]) break;
+
+      let dest = d3.select(`#node${i}`);
+      if (!reset && dest.classed("unselected")) {
+        possiblePath.classed("link-unselected", true);
+      } else {
+        possiblePath.classed("link-unselected", false);
+      }
+    }
+  }
 
   for (let i = 1; i <= neuronNumber; i++) {
     for (let j = i + 1; j <= neuronNumber; j++) {
       let possiblePath = d3.select(`#link${i}-${j}`);
-      if (possiblePath[0][0] == null) continue;
+      if (!possiblePath[0][0]) continue;
+
       let source = d3.select(`#node${i}`);
       if (j == neuronNumber) {
-        if (source.classed("unselected")) {
+        if (!reset && source.classed("unselected")) {
           possiblePath.classed("link-unselected", true);
         } else {
           possiblePath.classed("link-unselected", false);
         }
         continue;
       }
+
       let dest = d3.select(`#node${j}`);
-      if (source.classed("unselected") && dest.classed("unselected")) {
+      if (!reset && source.classed("unselected") && dest.classed("unselected")) {
         possiblePath.classed("link-unselected", true);
       } else {
         possiblePath.classed("link-unselected", false);
@@ -605,7 +635,7 @@ function changePathsVisibility() {
   }
 }
 
-function changeNeuronsVisibility() {
+function changeNeuronsVisibility(reset: boolean = false) {
   let neuronNumber = 0;
   for (let i = 1; i < network.length - 1; i++) {
     neuronNumber += network[i].length;
@@ -615,7 +645,12 @@ function changeNeuronsVisibility() {
     let div = d3.select(`#canvas-${i}`);
     let nodeGroup = d3.select(`#node${i}`);
 
-    if (!div.classed("selected") && !div.classed("unselected")) {
+    if (reset) {
+      div.classed("unselected", false);
+      nodeGroup.classed("unselected", false);
+      div.classed("selected", false);
+      nodeGroup.classed("unselected", false);
+    } else if (!div.classed("selected") && !div.classed("unselected")) {
       div.classed("unselected", true);
       nodeGroup.classed("unselected", true);
     }
