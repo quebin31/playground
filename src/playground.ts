@@ -284,6 +284,11 @@ function makeGUI() {
     reset();
   });
 
+  d3.select("#reset-focus").on("click", () => {
+    changeNeuronsVisibility(true);
+    changePathsVisibility(true);
+  });
+
   let showTestData = d3.select("#show-test-data").on("change", function () {
     state.showTestData = this.checked;
     state.serialize();
