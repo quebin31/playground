@@ -508,7 +508,7 @@ function drawNode(cx: number, cy: number, nodeId: string, isInput: boolean,
         width: BIAS_SIZE,
         height: BIAS_SIZE,
       }).on("mouseenter", function () {
-        updateHoverCard(HoverType.BIAS, node, d3.mouse(container.node()));
+        updateHoverCard(HoverType.BIAS, node, d3.mouse(container.node()), nodeId);
       }).on("mouseleave", function () {
         updateHoverCard(null);
       });
@@ -826,13 +826,34 @@ function addPlusMinusControl(x: number, layerIdx: number) {
 }
 
 function updateHoverCard(type: HoverType, nodeOrLink?: nn.Node | nn.Link,
-  coordinates?: [number, number]) {
+  coordinates?: [number, number], ids?: [string, string] | string) {
   let hovercard = d3.select("#hovercard");
+
   if (type == null) {
     hovercard.style("display", "none");
     d3.select("#svg").on("click", null);
     return;
   }
+
+  if (type === HoverType.WEIGHT) {
+    let [origId, destId] = ids as [string, string];
+    let path = d3.select(`#link${origId}-${destId}`);
+    if (path[0][0] && path.classed("link-unselected")) {
+      hovercard.style("display", "none");
+      d3.select("#svg").on("click", null);
+      return;
+    }
+  } else {
+    let id = ids as string;
+    let node = d3.select(`#canvas-${id}`);
+
+    if (node.classed("unselected")) {
+      hovercard.style("display", "none");
+      d3.select("#svg").on("click", null);
+      return;
+    }
+  }
+
   d3.select("#svg").on("click", () => {
     hovercard.select(".value").style("display", "none");
     let input = hovercard.select("input");
@@ -903,10 +924,12 @@ function drawLink(
     .attr("d", diagonal(datum, 0))
     .attr("class", "link-hover")
     .on("mouseenter", function () {
-      updateHoverCard(HoverType.WEIGHT, input, d3.mouse(this));
-    }).on("mouseleave", function () {
+      updateHoverCard(HoverType.WEIGHT, input, d3.mouse(this), [input.source.id, input.dest.id]);
+    })
+    .on("mouseleave", function () {
       updateHoverCard(null);
     });
+
   return line;
 }
 
